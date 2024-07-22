@@ -59,16 +59,61 @@ SDL_RenderCopy(renderer, screen, NULL, NULL);
 SDL_RenderPresent(renderer);
     
 
-BOOL done = FALSE;
-while(!done)
-      {
-    	SDL_Event event;
-    	while(SDL_PollEvent(&event))
-    	{
-		if (event.type == SDL_QUIT){ // closing the window 
+BOOL done  = FALSE;
+BOOL up    = FALSE;  
+BOOL down  = FALSE;
+BOOL left  = FALSE;
+BOOL right = FALSE;
+while(!done)//  checking for events until you quit the window
+{
+SDL_Event event;
+while(SDL_PollEvent(&event))
+{
+	if (event.type == SDL_QUIT){ // closing the window 
+		done = TRUE;
+		break;}
+	if(event.type!=SDL_KEYDOWN){
+		break;
+	}
+	SDL_Keycode kcode = event.key.keysym.sym;
+	switch(kcode)
+	{
+		case SDLK_ESCAPE:
 			done = TRUE;
-			break;}
-    	}
-    }
+			break;
+		case SDLK_UP:
+			up = TRUE;
+			break;
+		case SDLK_DOWN:
+			down = TRUE;
+			break;
+		case SDLK_LEFT:
+		    left = TRUE;
+		    break;
+		case SDLK_RIGHT:
+			right = TRUE;
+			break;
+		default:
+			break;}}
+
+memset(screen_pixels,0, WIDTH*HEIGHT*sizeof(u32));// reseting the whole screen
+
+if(up){
+ 	cursor.y -= 1;
+ 	up = FALSE;}
+if(down){
+ 	cursor.y += 1;
+ 	down = FALSE;}
+if(left){
+ 	cursor.x -= 1;
+ 	left = FALSE;}
+if(right){
+ 	cursor.x += 1;
+ 	right = FALSE;}
+FILLRECT(cursor,255, screen_pixels);
+SDL_UpdateTexture(screen, NULL, screen_pixels, WIDTH * sizeof(u32));
+SDL_RenderCopy(renderer, screen, NULL, NULL);
+SDL_RenderPresent(renderer);}
+	
 return 0;
 }
