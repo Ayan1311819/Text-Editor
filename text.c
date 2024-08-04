@@ -56,9 +56,8 @@ int main(int argc, char *argv[]) {
     SDL_Color textColor = {255, 255, 255, 255}; // White color
     SDL_Surface *textSurface = TTF_RenderText_Solid(font, "  ", textColor);
     SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-    //int textWidth = textSurface->w;
-    //int textHeight = textSurface->h;
-    int twl = 14 ;
+    int twl = 14;
+    int thl = 16;
     SDL_FreeSurface(textSurface);
     SDL_SetRenderTarget(renderer, textTexture);
     rect_t cursor = {0, 0, 2, 24};
@@ -69,10 +68,12 @@ int main(int argc, char *argv[]) {
     SDL_RenderCopy(renderer, textTexture, NULL, NULL);
     SDL_RenderPresent(renderer);
     
-    char ascii = '\0'; 
+    char ascii = '\0';
     char buffer[LEN] = {0};
     BOOL done = FALSE;
-    int id = 0;
+    int id = 0; 
+    //char charStr[2];
+ 
     
     while (!done) {
         SDL_Event event;
@@ -88,10 +89,10 @@ int main(int argc, char *argv[]) {
                         done = TRUE;
                         break;
                     case SDLK_UP:
-                        cursor.y = (cursor.y - twl + HEIGHT) % HEIGHT;
+                        cursor.y = (cursor.y - thl + HEIGHT) % HEIGHT;
                         break;
                     case SDLK_DOWN:
-                        cursor.y = (cursor.y + twl) % HEIGHT;
+                        cursor.y = (cursor.y + thl) % HEIGHT;
                         break;
                     case SDLK_LEFT:
                         cursor.x = (cursor.x - twl + WIDTH) % WIDTH;
@@ -103,27 +104,40 @@ int main(int argc, char *argv[]) {
                         if (id > 0) {
                             id--;
                             buffer[id] = '\0';
+                            cursor.x = (cursor.x - twl + WIDTH) % WIDTH;
                         }
                         break;
+                    case SDLK_RETURN:
+                    	cursor.y += 16;
+                    	cursor.x = 0;
+                    	//ascii = '\n';
+                    	break;
                     default:
                         ascii = (char)kcode;
                         break;
+
                 }
             }
-        }
-        
         memset(screen_pixels, 0, WIDTH * HEIGHT * sizeof(u32));
         SDL_RenderClear(renderer);
         
 		SDL_SetRenderTarget(renderer, textTexture);
+		if(ascii){
+			cursor.x += twl;
+		}
+		
+		
         FILLRECT(cursor, 0xFFFFFF, screen_pixels);
         SDL_UpdateTexture(screen, NULL, screen_pixels, WIDTH * sizeof(u32));
         SDL_RenderCopy(renderer, screen, NULL, NULL);
-
+		
+		 
         SDL_SetRenderTarget(renderer, NULL);
-		if (((ascii >= 'a' && ascii <= 'z') || (ascii >= '0' && ascii <= '9')) && id < LEN - 1) {
+		if (((ascii >= 'a' && ascii <= 'z') || (ascii >= 'A' && ascii <= 'Z') || (ascii >= '0' && ascii <= '9') || (ascii == ' ')) && id < LEN - 1) {
 				            buffer[id++] = ascii;
 				            buffer[id] = '\0';}
+		
+
 		
 		ascii = '\0';
 		textSurface = TTF_RenderText_Solid(font, buffer, textColor);
@@ -131,10 +145,10 @@ int main(int argc, char *argv[]) {
         	
         	SDL_DestroyTexture(textTexture);
         	textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
-        	SDL_Rect renderQuad = {0, 0, textSurface->w, textSurface->h};
+        	SDL_Rect renderQuad = {0,0, textSurface->w, textSurface->h};	
         	SDL_RenderCopy(renderer, textTexture, NULL, &renderQuad);
     		SDL_FreeSurface(textSurface);
-    		SDL_RenderPresent(renderer);}     
+    		SDL_RenderPresent(renderer);}}
     }
     
     SDL_DestroyTexture(textTexture);
